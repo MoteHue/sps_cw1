@@ -66,7 +66,6 @@ for i in range(noOfChunks):
 #   - linear        = blue
 #   - quadratic     = green
 #   - cubic         = yellow
-#   - exponential   = red
 def plotBestFit(xs, ys, AL, AQ, AC, resErrors):
     if min(resErrors) == resErrors[0]:
         plt.plot(xs, np.poly1d([AL[1],AL[0]])(xs), color="b")
@@ -74,8 +73,6 @@ def plotBestFit(xs, ys, AL, AQ, AC, resErrors):
         plt.plot(xs, np.poly1d([AQ[2],AQ[1],AQ[0]])(xs), color="g")
     elif min(resErrors) == resErrors[2]:
         plt.plot(xs, np.poly1d([AC[3],AC[2],AC[1],AC[0]])(xs), color="y")
-    #elif min(resErrors) == resErrors[4]:
-    #    plt.plot(xs, A[0] + A[4]*np.exp(xs), color="r")
 
 # Plot the graph.
 for i in range(noOfChunks):
