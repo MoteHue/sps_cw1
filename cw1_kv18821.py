@@ -5,22 +5,16 @@ import matplotlib.pyplot as plt
 from enum import Enum
 
 # Calculate the Least Squares Regression.
-def leastSquaresLinear(xs, ys):
+def leastSquares(xs, ys, lineType):
     ones = np.ones(xs.shape)
-    X = np.column_stack((ones, xs))
+    if lineType == "linear":
+        X = np.column_stack((ones, xs))
+    elif lineType == "quad":
+        X = np.column_stack((ones, xs, xs**2))
+    elif lineType == "cubic":
+        X = np.column_stack((ones, xs, xs**2, xs**3))
     A = np.linalg.inv(X.T @ X) @ X.T @ ys
     return A
-def leastSquaresQuad(xs, ys):
-    ones = np.ones(xs.shape)
-    X = np.column_stack((ones, xs, xs**2))
-    A = np.linalg.inv(X.T @ X) @ X.T @ ys
-    return A
-def leastSquaresCubic(xs, ys):
-    ones = np.ones(xs.shape)
-    X = np.column_stack((ones, xs, xs**2, xs**3))
-    A = np.linalg.inv(X.T @ X) @ X.T @ ys
-    return A
-
 
 # Calculate the residual error with y-squared differences.
 def ySquared(xs, ys, A, lineType):
@@ -30,15 +24,13 @@ def ySquared(xs, ys, A, lineType):
         ydiffs = np.poly1d([A[2],A[1],A[0]])(xs) - ys
     elif lineType == "cubic":
         ydiffs = np.poly1d([A[3],A[2],A[1],A[0]])(xs) - ys
-    #elif lineType == "exp":
-    #    ydiffs = (A[0] + A[4]*np.exp(xs)) - ys
 
     squared = ydiffs**2
     return np.sum(squared)
 
 # Calculate the residual error.
 def resError(xs, ys, AL, AQ, AC):
-     return [ySquared(xs, ys, AL, "linear"), ySquared(xs, ys, AQ, "quad"), ySquared(xs, ys, AC, "cubic")]#, ySquared(xs, ys, A, "exp")]
+     return [ySquared(xs, ys, AL, "linear"), ySquared(xs, ys, AQ, "quad"), ySquared(xs, ys, AC, "cubic")]
 
 # Load the points from the file specified in the command line.
 points = util.load_points_from_file(sys.argv[1])
@@ -57,14 +49,12 @@ for i in range(noOfChunks):
 
 # Assign the least squares results to a matrix A.
 ALinear = []
-for i in range(noOfChunks):
-    ALinear.append(leastSquaresLinear(xs[i], ys[i]))
 AQuad = []
-for i in range(noOfChunks):
-    AQuad.append(leastSquaresQuad(xs[i], ys[i]))
 ACubic = []
 for i in range(noOfChunks):
-    ACubic.append(leastSquaresCubic(xs[i], ys[i]))
+    ALinear.append(leastSquares(xs[i], ys[i], "linear"))
+    AQuad.append(leastSquares(xs[i], ys[i], "quad"))
+    ACubic.append(leastSquares(xs[i], ys[i], "cubic"))
 
 # Assign the residual errors into an array.
 resErrors = []
