@@ -3,6 +3,7 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from enum import Enum
+import random
 
 # Calculate the Least Squares Regression.
 def leastSquares(xs, ys, lineType):
@@ -43,23 +44,41 @@ noOfChunks = len(xpoints) // 20
 # Split the points into chunks.
 xs = []
 ys = []
+xsshuffled = []
+ysshuffled = [] 
 for i in range(noOfChunks):
     xs.append(xpoints[i*20 : (i+1)*20])
     ys.append(ypoints[i*20 : (i+1)*20])
+    # Shuffle the data.
+    shuffle = np.arange(xs[i].shape[0])
+    np.random.shuffle(shuffle)
+    xsshuffled.append(xs[i][shuffle])
+    ysshuffled.append(ys[i][shuffle])
+
+# Separate the training and test data.
+xstest = []
+xstrain = []
+ystest = []
+ystrain = []
+for i in range(noOfChunks):
+    xstest.append(xsshuffled[i][:5])
+    xstrain.append(xsshuffled[i][15:])
+    ystest.append(ysshuffled[i][:5])
+    ystrain.append(ysshuffled[i][15:])
 
 # Assign the least squares results to a matrix A.
 ALinear = []
 AQuad = []
 ACubic = []
 for i in range(noOfChunks):
-    ALinear.append(leastSquares(xs[i], ys[i], "linear"))
-    AQuad.append(leastSquares(xs[i], ys[i], "quad"))
-    ACubic.append(leastSquares(xs[i], ys[i], "cubic"))
+    ALinear.append(leastSquares(xstrain[i], ystrain[i], "linear"))
+    AQuad.append(leastSquares(xstrain[i], ystrain[i], "quad"))
+    ACubic.append(leastSquares(xstrain[i], ystrain[i], "cubic"))
 
 # Assign the residual errors into an array.
 resErrors = []
 for i in range(noOfChunks):
-    resErrors.append(resError(xs[i], ys[i], ALinear[i], AQuad[i], ACubic[i]))
+    resErrors.append(resError(xstest[i], ystest[i], ALinear[i], AQuad[i], ACubic[i]))
 
 # Plot the line of best fit.
 # The colour represents the line type:
