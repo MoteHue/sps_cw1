@@ -93,7 +93,11 @@ def plotBestFit(xs, ys, AL, AQ, AC, resErrors):
     elif min(resErrors) == resErrors[2]:
         plt.plot(xs, np.poly1d([AC[3],AC[2],AC[1],AC[0]])(xs), color="y")
 
+print(np.sum(resErrors))
+
 # Plot the graph.
-for i in range(noOfChunks):
-    plotBestFit(xs[i], ys[i], ALinear[i], AQuad[i], ACubic[i], resErrors[i])
-util.view_data_segments(xpoints, ypoints)
+if (len(sys.argv) > 2) :
+    if (sys.argv[2] == "--plot") :
+        for i in range(noOfChunks):
+            plotBestFit(xs[i], ys[i], ALinear[i], AQuad[i], ACubic[i], resErrors[i])
+        util.view_data_segments(xpoints, ypoints)
