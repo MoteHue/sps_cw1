@@ -44,60 +44,74 @@ noOfChunks = len(xpoints) // 20
 # Split the points into chunks.
 xs = []
 ys = []
-xsshuffled = []
-ysshuffled = [] 
-for i in range(noOfChunks):
-    xs.append(xpoints[i*20 : (i+1)*20])
-    ys.append(ypoints[i*20 : (i+1)*20])
-    # Shuffle the data.
-    shuffle = np.arange(xs[i].shape[0])
-    np.random.shuffle(shuffle)
-    xsshuffled.append(xs[i][shuffle])
-    ysshuffled.append(ys[i][shuffle])
+for n in range(noOfChunks):
+    xs.append(xpoints[n*20 : (n+1)*20])
+    ys.append(ypoints[n*20 : (n+1)*20])
 
-# Separate the training and test data.
-xstest = []
 xstrain = []
-ystest = []
 ystrain = []
-for i in range(noOfChunks):
-    xstest.append(xsshuffled[i][:5])
-    xstrain.append(xsshuffled[i][15:])
-    ystest.append(ysshuffled[i][:5])
-    ystrain.append(ysshuffled[i][15:])
 
-# Assign the least squares results to a matrix A.
-ALinear = []
-AQuad = []
-ACubic = []
-for i in range(noOfChunks):
-    ALinear.append(leastSquares(xstrain[i], ystrain[i], "linear"))
-    AQuad.append(leastSquares(xstrain[i], ystrain[i], "quad"))
-    ACubic.append(leastSquares(xstrain[i], ystrain[i], "cubic"))
+for n in range(noOfChunks):
+    xtrain = []
+    ytrain = []
+    for i in range(20):
+        # Take out test point from the rest of the training data.
+        xtr = []
+        ytr = []
 
-# Assign the residual errors into an array.
-resErrors = []
-for i in range(noOfChunks):
-    resErrors.append(resError(xstest[i], ystest[i], ALinear[i], AQuad[i], ACubic[i]))
+        xtr.extend(xs[n][0:i])
+        xtr.extend(xs[n][i+1:20])
+        ytr.extend(ys[n][0:i])
+        ytr.extend(ys[n][i+1:20])
+
+        xtrain.append(xtr)
+        ytrain.append(ytr)
+    xstrain.append(xtrain)
+    ystrain.append(ytrain)
+
+xstrain = np.array(xstrain)
+ystrain = np.array(ystrain)
+
+minResErrors = []
+for n in range(noOfChunks):
+    sum = 0
+    for i in range(20):
+        AL = leastSquares(xstrain[n][i], ystrain[n][i], "linear")
+        AQ = leastSquares(xstrain[n][i], ystrain[n][i], "quad")
+        AC = leastSquares(xstrain[n][i], ystrain[n][i], "cubic")
+        sum += np.array(resError(xs[n][i], ys[n][i], AL, AQ, AC))
+    if min(sum) == sum[0]:
+        minResErrors.append([min(sum), "linear"])
+    if min(sum) == sum[1]:
+        minResErrors.append([min(sum), "quad"])
+    if min(sum) == sum[2]:
+        minResErrors.append([min(sum), "cubic"])
 
 # Plot the line of best fit.
 # The colour represents the line type:
 #   - linear        = blue
 #   - quadratic     = green
 #   - cubic         = yellow
-def plotBestFit(xs, ys, AL, AQ, AC, resErrors):
-    if min(resErrors) == resErrors[0]:
-        plt.plot(xs, np.poly1d([AL[1],AL[0]])(xs), color="b")
-    elif min(resErrors) == resErrors[1]:
-        plt.plot(xs, np.poly1d([AQ[2],AQ[1],AQ[0]])(xs), color="g")
-    elif min(resErrors) == resErrors[2]:
-        plt.plot(xs, np.poly1d([AC[3],AC[2],AC[1],AC[0]])(xs), color="y")
+def plotBestFit(xs, ys, resError):
+    if resError[1] == "linear":
+        A = leastSquares(xs, ys, "linear")
+        plt.plot(xs, np.poly1d([A[1],A[0]])(xs), color="b")
+    elif resError[1] == "quad":
+        A = leastSquares(xs, ys, "quad")
+        plt.plot(xs, np.poly1d([A[2],A[1],A[0]])(xs), color="g")
+    elif resError[1] == "cubic":
+        A = leastSquares(xs, ys, "cubic")
+        plt.plot(xs, np.poly1d([A[3],A[2],A[1],A[0]])(xs), color="y")
 
-print(np.sum(resErrors))
+sumErrors = 0
+for n in range(noOfChunks):
+    sumErrors += minResErrors[n][0]
+
+print(sumErrors)
 
 # Plot the graph.
 if (len(sys.argv) > 2) :
     if (sys.argv[2] == "--plot") :
-        for i in range(noOfChunks):
-            plotBestFit(xs[i], ys[i], ALinear[i], AQuad[i], ACubic[i], resErrors[i])
+        for n in range(noOfChunks):
+            plotBestFit(xs[n], ys[n], minResErrors[n])
         util.view_data_segments(xpoints, ypoints)
