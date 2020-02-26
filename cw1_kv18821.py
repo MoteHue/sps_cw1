@@ -125,4 +125,9 @@ if (len(sys.argv) > 2) :
     if (sys.argv[2] == "--plot") :
         for n in range(noOfChunks):
             plotBestFit(xs[n], ys[n], minResErrors[n])
+        plt.plot(0, 0, color="b", label="Linear")
+        plt.plot(0, 0, color="g", label="Quadratic")
+        plt.plot(0, 0, color="y", label="Cubic")
+        plt.plot(0, 0, color="r", label="Sine")
+        plt.legend()
         util.view_data_segments(xpoints, ypoints)
