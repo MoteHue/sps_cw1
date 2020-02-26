@@ -10,8 +10,6 @@ def leastSquares(xs, ys, lineType):
     ones = np.ones(xs.shape)
     if lineType == "linear":
         X = np.column_stack((ones, xs))
-    elif lineType == "quad":
-        X = np.column_stack((ones, xs, xs**2))
     elif lineType == "cubic":
         X = np.column_stack((ones, xs, xs**2, xs**3))
     elif lineType == "sine":
@@ -23,8 +21,6 @@ def leastSquares(xs, ys, lineType):
 def ySquared(xs, ys, A, lineType):
     if lineType == "linear":
         ydiffs = np.poly1d([A[1],A[0]])(xs) - ys
-    elif lineType == "quad":
-        ydiffs = np.poly1d([A[2],A[1],A[0]])(xs) - ys
     elif lineType == "cubic":
         ydiffs = np.poly1d([A[3],A[2],A[1],A[0]])(xs) - ys
     elif lineType == "sine":
@@ -34,8 +30,8 @@ def ySquared(xs, ys, A, lineType):
     return np.sum(squared)
 
 # Calculate the residual error.
-def resError(xs, ys, AL, AQ, AC, AS):
-     return [ySquared(xs, ys, AL, "linear"), ySquared(xs, ys, AQ, "quad"), ySquared(xs, ys, AC, "cubic"), ySquared(xs, ys, AS, "sine")]
+def resError(xs, ys, AL, AC, AS):
+     return [ySquared(xs, ys, AL, "linear"), ySquared(xs, ys, AC, "cubic"), ySquared(xs, ys, AS, "sine")]
 
 # Load the points from the file specified in the command line.
 points = util.load_points_from_file(sys.argv[1])
@@ -81,32 +77,25 @@ for n in range(noOfChunks):
     sum = 0
     for i in range(20):
         AL = leastSquares(xstrain[n][i], ystrain[n][i], "linear")
-        AQ = leastSquares(xstrain[n][i], ystrain[n][i], "quad")
         AC = leastSquares(xstrain[n][i], ystrain[n][i], "cubic")
         AS = leastSquares(xstrain[n][i], ystrain[n][i], "sine")
-        sum += np.array(resError(xs[n][i], ys[n][i], AL, AQ, AC, AS))
+        sum += np.array(resError(xs[n][i], ys[n][i], AL, AC, AS))
     if min(sum) == sum[0]:
         minResErrors.append([min(sum), "linear"])
     if min(sum) == sum[1]:
-        minResErrors.append([min(sum), "quad"])
-    if min(sum) == sum[2]:
         minResErrors.append([min(sum), "cubic"])
-    if min(sum) == sum[3]:
+    if min(sum) == sum[2]:
         minResErrors.append([min(sum), "sine"])
 
 # Plot the line of best fit.
 # The colour represents the line type:
 #   - linear        = blue
-#   - quadratic     = green
 #   - cubic         = yellow
 #   - sine          = red
 def plotBestFit(xs, ys, resError):
     if resError[1] == "linear":
         A = leastSquares(xs, ys, "linear")
         plt.plot(xs, np.poly1d([A[1],A[0]])(xs), color="b")
-    elif resError[1] == "quad":
-        A = leastSquares(xs, ys, "quad")
-        plt.plot(xs, np.poly1d([A[2],A[1],A[0]])(xs), color="g")
     elif resError[1] == "cubic":
         A = leastSquares(xs, ys, "cubic")
         plt.plot(xs, np.poly1d([A[3],A[2],A[1],A[0]])(xs), color="y")
@@ -125,9 +114,9 @@ if (len(sys.argv) > 2) :
     if (sys.argv[2] == "--plot") :
         for n in range(noOfChunks):
             plotBestFit(xs[n], ys[n], minResErrors[n])
-        plt.plot(0, 0, color="b", label="Linear")
-        plt.plot(0, 0, color="g", label="Quadratic")
-        plt.plot(0, 0, color="y", label="Cubic")
-        plt.plot(0, 0, color="r", label="Sine")
+        # Plot zero-length lines to display on the legennd.
+        plt.plot(xs[0][0], ys[0][0], color="b", label="Linear")
+        plt.plot(xs[0][0], ys[0][0], color="y", label="Polynomial (Cubic)")
+        plt.plot(xs[0][0], ys[0][0], color="r", label="Sine")
         plt.legend()
         util.view_data_segments(xpoints, ypoints)
