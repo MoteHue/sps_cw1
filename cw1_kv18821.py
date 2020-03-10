@@ -14,7 +14,7 @@ def leastSquares(xs, ys, lineType):
         X = np.column_stack((ones, xs, xs**2, xs**3))
     elif lineType == "sine":
         X = np.column_stack((ones, np.sin(xs)))
-    A = np.linalg.inv(X.T @ X) @ X.T @ ys
+    A = np.linalg.inv(X.T.dot(X)).dot(X.T).dot(ys)
     return A
 
 # Calculate the residual error with y-squared differences.
