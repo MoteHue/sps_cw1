@@ -80,12 +80,14 @@ for n in range(noOfChunks):
         AC = leastSquares(xstrain[n][i], ystrain[n][i], "cubic")
         AS = leastSquares(xstrain[n][i], ystrain[n][i], "sine")
         sum += np.array(resError(xs[n][i], ys[n][i], AL, AC, AS))
-    if min(sum) == sum[0]:
-        minResErrors.append([min(sum), "linear"])
-    if min(sum) == sum[1]:
-        minResErrors.append([min(sum), "cubic"])
-    if min(sum) == sum[2]:
+    if min(sum) == sum[2] and sum[2] < 0.8*sum[0]:
         minResErrors.append([min(sum), "sine"])
+    elif min(sum) == sum[1] and sum[1] < 0.8*sum[0]:
+        minResErrors.append([min(sum), "cubic"])
+    else:
+        minResErrors.append([min(sum), "linear"])
+    
+    
 
 # Plot the line of best fit.
 # The colour represents the line type:
