@@ -80,14 +80,14 @@ for n in range(noOfChunks):
         AC = leastSquares(xstrain[n][i], ystrain[n][i], "cubic")
         AS = leastSquares(xstrain[n][i], ystrain[n][i], "sine")
         sum += np.array(resError(xs[n][i], ys[n][i], AL, AC, AS))
+        
     if min(sum) == sum[2] and sum[2] < 0.8*sum[0]:
         minResErrors.append([min(sum), "sine"])
     elif min(sum) == sum[1] and sum[1] < 0.8*sum[0]:
         minResErrors.append([min(sum), "cubic"])
     else:
         minResErrors.append([min(sum), "linear"])
-    
-    
+
 
 # Plot the line of best fit.
 # The colour represents the line type:
@@ -97,7 +97,7 @@ for n in range(noOfChunks):
 def plotBestFit(xs, ys, resError):
     if resError[1] == "linear":
         A = leastSquares(xs, ys, "linear")
-        plt.plot(xs, np.poly1d([A[1],A[0]])(xs), color="b")
+        plt.plot(xs, np.poly1d([A[1],A[0]])(xs), color="b")    
     elif resError[1] == "cubic":
         A = leastSquares(xs, ys, "cubic")
         plt.plot(xs, np.poly1d([A[3],A[2],A[1],A[0]])(xs), color="y")
@@ -107,7 +107,12 @@ def plotBestFit(xs, ys, resError):
 
 sumErrors = 0
 for n in range(noOfChunks):
-    sumErrors += minResErrors[n][0]
+    if minResErrors[n][1] == "linear":
+        sumErrors += ySquared(xs[n], ys[n], leastSquares(xs[n], ys[n], "linear"), "linear")
+    elif minResErrors[n][1] == "cubic":
+        sumErrors += ySquared(xs[n], ys[n], leastSquares(xs[n], ys[n], "cubic"), "cubic")
+    elif minResErrors[n][1] == "sine":
+        sumErrors += ySquared(xs[n], ys[n], leastSquares(xs[n], ys[n], "sine"), "sine")
 
 print(sumErrors)
 
