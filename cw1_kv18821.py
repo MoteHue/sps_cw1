@@ -48,9 +48,9 @@ for n in range(noOfChunks):
     xs.append(xpoints[n*20 : (n+1)*20])
     ys.append(ypoints[n*20 : (n+1)*20])
 
+# Split the data ready for take-one-out cross validation.
 xstrain = []
 ystrain = []
-
 for n in range(noOfChunks):
     xtrain = []
     ytrain = []
@@ -72,6 +72,7 @@ for n in range(noOfChunks):
 xstrain = np.array(xstrain)
 ystrain = np.array(ystrain)
 
+# Calculate the minimum residual errors.
 minResErrors = []
 for n in range(noOfChunks):
     sum = 0
@@ -80,7 +81,7 @@ for n in range(noOfChunks):
         AC = leastSquares(xstrain[n][i], ystrain[n][i], "cubic")
         AS = leastSquares(xstrain[n][i], ystrain[n][i], "sine")
         sum += np.array(resError(xs[n][i], ys[n][i], AL, AC, AS))
-        
+    # Work out which line type is best, with naive generalisation.
     if min(sum) == sum[2] and sum[2] < 0.8*sum[0]:
         minResErrors.append([min(sum), "sine"])
     elif min(sum) == sum[1] and sum[1] < 0.8*sum[0]:
@@ -105,6 +106,7 @@ def plotBestFit(xs, ys, resError):
         A = leastSquares(xs, ys, "sine")
         plt.plot(xs, np.poly1d([A[1],A[0]])(np.sin(xs)), color="r")
 
+# Sum up and then print the total reconstruction error.
 sumErrors = 0
 for n in range(noOfChunks):
     if minResErrors[n][1] == "linear":
@@ -113,7 +115,6 @@ for n in range(noOfChunks):
         sumErrors += ySquared(xs[n], ys[n], leastSquares(xs[n], ys[n], "cubic"), "cubic")
     elif minResErrors[n][1] == "sine":
         sumErrors += ySquared(xs[n], ys[n], leastSquares(xs[n], ys[n], "sine"), "sine")
-
 print(sumErrors)
 
 # Plot the graph.
