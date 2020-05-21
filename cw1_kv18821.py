@@ -81,7 +81,7 @@ for n in range(noOfChunks):
         AC = leastSquares(xstrain[n][i], ystrain[n][i], "cubic")
         AS = leastSquares(xstrain[n][i], ystrain[n][i], "sine")
         sum += np.array(residual(xs[n][i], ys[n][i], AL, AC, AS))
-    # Work out which line type is best, with naive generalisation.
+    # Work out which line type is best, with naïve regularisation.
     if min(sum) == sum[2] and sum[2] < 0.8*sum[0]:
         minResiduals.append([min(sum), "sine"])
     elif min(sum) == sum[1] and sum[1] < 0.8*sum[0]:
