@@ -29,7 +29,7 @@ def ySquared(xs, ys, A, lineType):
     squared = ydiffs**2
     return np.sum(squared)
 
-# Calculate the residual.
+# Return the residuals for each line type.
 def residual(xs, ys, AL, AC, AS):
      return [ySquared(xs, ys, AL, "linear"), ySquared(xs, ys, AC, "cubic"), ySquared(xs, ys, AS, "sine")]
 
